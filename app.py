@@ -81,20 +81,25 @@ if st.session_state.get("predictions") is None:
 
 tab_selector = st.pills(
     "Tabs",
-    ["Home", "Datasets"],
-    default="Home",
+    ["Wildlife Classifier", "Bounding Box Detection", "Datasets"],
+    default="Wildlife Classifier",
     selection_mode="single",
     label_visibility="collapsed",
 )
 
-if tab_selector == "Home":
+if tab_selector == "Wildlife Classifier":
     st.title("Wildlife Camera Trap AI Classifier")
     st.write(
         """
         This app uses a custom ResNet18 model to classify animal species in camera trap images.
-        To begin, upload images and click the 'Run Classifier' button.
-        You can find additional information on the datasets used for training in the 'Datasets' tab.
+        To begin, upload images and click the 'Run Classifier' button. You can stay in this page
+        for higher accuracy classification without automatic bounding box detection or head over
+        to the 'Bounding Box Detection' tab for automatic bounding box detection at the cost of
+        lower accuracy.
         """
+    )
+    st.write(
+        "You can find additional information on the datasets used for training in the 'Datasets' tab."
     )
     st.write(
         "To learn more about the model, visit the project's [GitHub repo](GITHUB_URL)."
@@ -111,29 +116,46 @@ if tab_selector == "Home":
 
     predictions = {}
     if uploaded_files:
-        st.info(
-            "To clear all uploaded images press 'Clear Results' and then press the 'Home' tab twice."
-        )
+        # st.info(
+        #     "To clear all uploaded images press 'Clear Results' and then press the 'Home' tab twice."
+        # )
         # st.divider()
-
-        with st.expander("Classifier Settings", expanded=True):
-            conf_threshold = st.slider(
-                "Adjust the confidence threshold to filter out low-confidence predictions (default value is 0.8).",
-                0.0,
-                1.0,
-                0.8,
-                0.05,
-            )
 
         images = []
         for file in uploaded_files:
             image = Image.open(file)
             images.append(image)
 
+        with st.expander("**Additional Settings**", expanded=True):
+            st.write(
+                "Adjust the confidence threshold to filter out low-confidence predictions (default value is 0.8)."
+            )
+            conf_threshold = st.slider(
+                "Confidence Threshold.",
+                0.0,
+                1.0,
+                0.8,
+                0.01,
+                label_visibility="collapsed",
+            )
+
+            show_images = st.toggle("Show uploaded images", False)
+
+            if show_images:
+                cols = st.columns(len(uploaded_files))
+                for col, file, image in zip(cols, uploaded_files, images):
+                    col.image(image, caption=file.name, width=150)
+
         col1, col2 = st.columns(2)
         with col1:
             # Button to run the classifier
-            if st.button("Run Classifier", use_container_width=True, type="primary"):
+            run_button = st.button(
+                "Run Classifier",
+                use_container_width=True,
+                type="primary",
+            )
+
+            if run_button:
                 for file, image in zip(uploaded_files, images):
                     prediction = classifier(image, conf_threshold)
                     predictions[file.name] = prediction
@@ -192,3 +214,21 @@ if tab_selector == "Home":
 
     else:
         st.info("Please upload images to begin.")
+
+
+if tab_selector == "Bounding Box Detection":
+    st.title("Wildlife Camera Trap AI Classifier")
+    st.write(
+        """
+        This app uses a custom ResNet18 model to classify animal species in camera trap images
+        after identifying the subjects bounding box using a YOLOv5 based model.
+        To begin, upload images and click the 'Run Classifier' button.
+        You can stay in this page for for automatic bounding box detection at the cost of lower
+        accuracy or head over to the 'Wildlife Classifier' tab for higher accuracy classification
+        without automatic bounding box detection.
+        """
+    )
+    st.write(
+        "To learn more about the model, visit the project's [GitHub repo](GITHUB_URL)."
+    )
+    st.write("")
