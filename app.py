@@ -112,11 +112,11 @@ if tab_selector == "Home":
     predictions = {}
     if uploaded_files:
         st.info(
-            "If you want to clear all uploaded images just press the 'Home' tab twice."
+            "To clear all uploaded images press 'Clear Results' and then press the 'Home' tab twice."
         )
-        st.write("")
+        # st.divider()
 
-        with st.expander("Classifier Settings", expanded=False):
+        with st.expander("Classifier Settings", expanded=True):
             conf_threshold = st.slider(
                 "Adjust the confidence threshold to filter out low-confidence predictions (default value is 0.8).",
                 0.0,
@@ -130,13 +130,19 @@ if tab_selector == "Home":
             image = Image.open(file)
             images.append(image)
 
-        # Button to run the classifier
-        if st.button("Run Classifier", use_container_width=True, type="primary"):
-            for file, image in zip(uploaded_files, images):
-                prediction = classifier(image, conf_threshold)
-                predictions[file.name] = prediction
+        col1, col2 = st.columns(2)
+        with col1:
+            # Button to run the classifier
+            if st.button("Run Classifier", use_container_width=True, type="primary"):
+                for file, image in zip(uploaded_files, images):
+                    prediction = classifier(image, conf_threshold)
+                    predictions[file.name] = prediction
 
-            st.session_state["predictions"] = predictions
+                st.session_state["predictions"] = predictions
+
+        with col2:
+            if st.button("Clear Results", use_container_width=True):
+                st.session_state["predictions"] = {}
 
         predictions_df = pd.DataFrame(
             list(st.session_state.predictions.items()),
@@ -146,11 +152,10 @@ if tab_selector == "Home":
         # Creates a df to plot frequency of each class
         chart_df = pd.DataFrame(predictions_df["Identified Animal"].value_counts())
 
-        st.divider()
-        st.write("## Results preview")
-
-        # Downloads CSV file with all the info
         if predictions_df.shape[0] > 0:
+            st.write("## Results preview")
+
+            # Downloads CSV file with all the info
             csv = predictions_df.to_csv(index=False)
             st.download_button(
                 "Download Complete Results to CSV file",
@@ -159,29 +164,31 @@ if tab_selector == "Home":
                 mime="text/csv",
             )
 
-        st.write("Number of images uploaded:", len(uploaded_files))
-        st.write("")
-
-        # col1, col2 = st.columns([1, 2])
-        # with col1:
-        st.dataframe(predictions_df.head(10), hide_index=True, use_container_width=True)
-        st.markdown(
-            f"<p style='font-size:14px; text-align: end'>(showing the first {predictions_df.shape[0]} results)</p>",
-            unsafe_allow_html=True,
-        )
-
-        more_info = st.pills(
-            "More Info",
-            ["More info"],
-            selection_mode="single",
-            label_visibility="collapsed",
-        )
-
-        if more_info:
-            # with col2:
-            st.write("### Number of animals detected per species")
+            st.write("Number of images uploaded:", len(uploaded_files))
             st.write("")
-            st.bar_chart(chart_df, x_label="Species", y_label="N. of occurrences")
+
+            st.dataframe(
+                predictions_df.head(10), hide_index=True, use_container_width=True
+            )
+            st.markdown(
+                f"""
+                <p style='font-size:14px; text-align: end'>
+                (showing the first {predictions_df.shape[0] if predictions_df.shape[0] < 10 else 10} results)
+                </p>""",
+                unsafe_allow_html=True,
+            )
+
+            more_info = st.pills(
+                "More Info",
+                ["More info"],
+                selection_mode="single",
+                label_visibility="collapsed",
+            )
+
+            if more_info:
+                st.write("### Number of animals detected per species")
+                st.write("")
+                st.bar_chart(chart_df, x_label="Species", y_label="N. of occurrences")
 
     else:
         st.info("Please upload images to begin.")
