@@ -15,6 +15,8 @@ GITHUB_URL = "https://github.com/SnowdasNeves/cifar10-image-classifier"
 def classifier(image, threshold):
     """Receives uploaded images and returns predictions."""
 
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
     model = models.resnet18(pretrained=False)  # Base ResNet18 model
 
     # Custom fully connected layers
@@ -33,6 +35,7 @@ def classifier(image, threshold):
         )
     )
 
+    model = model.to(device)
     model.eval()
 
     preprocess = transforms.Compose(
@@ -42,7 +45,7 @@ def classifier(image, threshold):
             transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
         ]
     )
-    img_tensor = preprocess(image).unsqueeze(0)
+    img_tensor = preprocess(image).unsqueeze(0).to(device)
 
     with torch.no_grad():
         output = model(img_tensor)
@@ -70,12 +73,11 @@ def classifier(image, threshold):
         return classes[predicted.item()]
 
 
-def click_button():
-    st.session_state.clicked = not st.session_state.clicked
-
-
 # Page design
 st.set_page_config(page_title="Wildlife AI Classifier", page_icon=":elephant:")
+
+if st.session_state.get("predictions") is None:
+    st.session_state["predictions"] = {}
 
 tab_selector = st.pills(
     "Tabs",
@@ -107,20 +109,12 @@ if tab_selector == "Home":
         label_visibility="collapsed",
     )
 
+    predictions = {}
     if uploaded_files:
-
-        images = []
-        for file in uploaded_files:
-            image = Image.open(file)
-            images.append(image)
-
-        # show_images = st.toggle("Show Uploaded Images", value=False)
-        # st.write("")
-
-        # if show_images:
-        #     cols = st.columns(len(uploaded_files))
-        #     for col, file, image in zip(cols, uploaded_files, images):
-        #         col.image(image, caption=file.name, width=150)
+        st.info(
+            "If you want to clear all uploaded images just press the 'Home' tab twice."
+        )
+        st.write("")
 
         with st.expander("Classifier Settings", expanded=False):
             conf_threshold = st.slider(
@@ -131,36 +125,32 @@ if tab_selector == "Home":
                 0.05,
             )
 
-        # Initialize button state
-        if "clicked" not in st.session_state:
-            st.session_state.clicked = False
+        images = []
+        for file in uploaded_files:
+            image = Image.open(file)
+            images.append(image)
 
         # Button to run the classifier
-        st.button(
-            "Run Classifier",
-            use_container_width=True,
-            type="primary",
-            on_click=click_button,
-        )
-
-        if st.session_state.clicked:
-            predictions = {}
+        if st.button("Run Classifier", use_container_width=True, type="primary"):
             for file, image in zip(uploaded_files, images):
                 prediction = classifier(image, conf_threshold)
                 predictions[file.name] = prediction
 
-            predictions_df = pd.DataFrame(
-                list(predictions.items()),
-                columns=["File Name", "Identified Animal"],
-            )
+            st.session_state["predictions"] = predictions
 
-            # Creates a df to plot frequency of each class
-            chart_df = pd.DataFrame(predictions_df["Identified Animal"].value_counts())
+        predictions_df = pd.DataFrame(
+            list(st.session_state.predictions.items()),
+            columns=["File Name", "Identified Animal"],
+        )
 
-            st.divider()
-            st.write("## Results preview")
+        # Creates a df to plot frequency of each class
+        chart_df = pd.DataFrame(predictions_df["Identified Animal"].value_counts())
 
-            # Downloads CSV file with all the info
+        st.divider()
+        st.write("## Results preview")
+
+        # Downloads CSV file with all the info
+        if predictions_df.shape[0] > 0:
             csv = predictions_df.to_csv(index=False)
             st.download_button(
                 "Download Complete Results to CSV file",
@@ -169,27 +159,29 @@ if tab_selector == "Home":
                 mime="text/csv",
             )
 
-            st.write("Number of images uploaded:", len(uploaded_files))
+        st.write("Number of images uploaded:", len(uploaded_files))
+        st.write("")
+
+        # col1, col2 = st.columns([1, 2])
+        # with col1:
+        st.dataframe(predictions_df.head(10), hide_index=True, use_container_width=True)
+        st.markdown(
+            f"<p style='font-size:14px; text-align: end'>(showing the first {predictions_df.shape[0]} results)</p>",
+            unsafe_allow_html=True,
+        )
+
+        more_info = st.pills(
+            "More Info",
+            ["More info"],
+            selection_mode="single",
+            label_visibility="collapsed",
+        )
+
+        if more_info:
+            # with col2:
+            st.write("### Number of animals detected per species")
             st.write("")
-
-            # col1, col2 = st.columns([1, 2])
-            # with col1:
-            st.dataframe(
-                predictions_df.head(10), hide_index=True, use_container_width=True
-            )
-
-            more_info = st.pills(
-                "More Info",
-                ["More info"],
-                selection_mode="single",
-                label_visibility="collapsed",
-            )
-
-            if more_info:
-                # with col2:
-                st.write("### Number of animals detected per species")
-                st.write("")
-                st.bar_chart(chart_df, x_label="Species", y_label="N. of occurrences")
+            st.bar_chart(chart_df, x_label="Species", y_label="N. of occurrences")
 
     else:
         st.info("Please upload images to begin.")
