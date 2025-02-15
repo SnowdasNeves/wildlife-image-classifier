@@ -7,5 +7,4 @@ torch
 torchvision
 torchaudio
 opencv-python
-tqdm
-megadetector
+ultralytics
