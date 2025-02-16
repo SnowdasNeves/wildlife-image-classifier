@@ -2,11 +2,13 @@
 
 This project uses deep learning models to classify wildlife images and detect bounding boxes around animals in camera trap images. The models were fine-tuned using the CIFAR-10 and CCT20 datasets and deployed via a Streamlit-based application.
 
+To classify your own images without having to download the files in this repo you can access the [project's Hugging Face space]().
+
 ## Project Structure
 
-- **`yolo_bbox_detection.ipynb`**: Training of the YOLO model for bounding box detection.
-- **`cct20_resnet.ipynb`**: Training of the ResNet18 model using the CCT20 dataset.
-- **`cifar10_resnet.ipynb`**: Training of the ResNet18 model using the CIFAR-10 dataset.
+- **`yolo_bbox_detection.ipynb`**: Training and testing of the YOLO model for bounding box detection.
+- **`cct20_resnet.ipynb`**: Training and testing of the ResNet18 model using the CCT20 dataset.
+- **`cifar10_resnet.ipynb`**: Training and testing of the ResNet18 model using the CIFAR-10 dataset.
 - **`cifar10_eda.ipynb` & `cct20_eda.ipynb`**: Exploratory Data Analysis for CIFAR-10 and CCT20.
 - **`app.py`**: Streamlit application for real-time classification and detection.
 - **`requirements.txt`**: Dependencies for running the application.
@@ -17,10 +19,12 @@ This project uses deep learning models to classify wildlife images and detect bo
 1. **ResNet18**: Fine-tuned on CIFAR-10 and CCT20.
 2. **YOLO**: Custom-trained for bounding box detection in camera trap images using the CCT20 benchmark subset.
 
+Model evaluation metrics can be accessed in the respective testing files (see Project Structure above).
+
 ## Datasets
 
-- **[CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html)**: General low resolution, standardized image dataset with centered subject.
-- **[CCT20](https://lila.science/datasets/caltech-camera-traps)**: Camera trap images of Southwestern USA animal species.
+- **[CIFAR-10](https://www.cs.toronto.edu/~kriz/cifar.html)**: General low resolution, standardized image dataset with centered subject. Can be downloaded directly from the `torchvision` library.
+- **[CCT20](https://lila.science/datasets/caltech-camera-traps)**: Camera trap images of Southwestern USA animal species. The used benchmark subset can be downloaded to a local directory (6 GB). The code in `cct20_resnet.ipynb` assumes dataset images and metadata stored in `cct20-images` and `cct20-metadata` directories.
 
 ## Installation
 
@@ -33,7 +37,7 @@ cd <repo_folder>
 pip install -r requirements.txt
 ```
 
-## Running the Application
+## Running the Application Locally
 
 ```bash
 streamlit run app.py

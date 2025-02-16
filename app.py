@@ -131,10 +131,17 @@ tab_selector = st.pills(
 )
 
 if tab_selector == "Wildlife Classifier":
-    st.title("Wildlife Camera Trap AI Classifier")
+    st.title(":paw_prints: Wildlife Camera Trap AI Classifier :paw_prints:")
     st.write(
         """
-        This app uses a custom ResNet18 model to classify animal species in camera trap images.
+        This app uses a custom model to classify animal species in camera trap images.
+
+        This page allows users to upload images for species identification
+        using a ResNet18 model trained on the CIFAR-10 dataset. Users can adjust the
+        confidence threshold to filter low-confidence predictions and view the uploaded images
+        if desired. Upon running the classifier, predictions are displayed,
+        and users can download the results as a CSV file.
+
         To begin, upload images and click the 'Run Classifier' button. You can stay in this page
         for higher accuracy classification without automatic bounding box detection or head over
         to the 'Bounding Box Detection' tab for automatic bounding box detection at the cost of
@@ -142,10 +149,10 @@ if tab_selector == "Wildlife Classifier":
         """
     )
     st.write(
-        "You can find additional information on the datasets used for training in the 'Datasets' tab."
-    )
-    st.write(
-        "To learn more about the model, visit the project's [GitHub repo](GITHUB_URL)."
+        """
+        You can find additional information on the datasets used for training in the 'Datasets' tab.
+        To learn more about the model, visit the project's [GitHub repo](GITHUB_URL).
+        """
     )
     st.write("")
 
@@ -271,11 +278,15 @@ if tab_selector == "Wildlife Classifier":
 
 
 if tab_selector == "Bounding Box Detection":
-    st.title("Wildlife Camera Trap AI Classifier")
+    st.title(":paw_prints: Wildlife Camera Trap AI Classifier :paw_prints:")
     st.write(
         """
-        This app uses a custom ResNet18 model to classify animal species in camera trap images
-        after identifying the subjects bounding box using a YOLOv5 based model.
+        This page uses a YOLO-based model to detect animals in images by
+        identifying their bounding boxes. After detecting the bounding boxes, the cropped animal
+        images are classified using the CCT20-trained ResNet18 model. Users can adjust the classification
+        and bounding box detection thresholds, view the cropped images, and download the results.
+        This page is particularly useful for images with multiple subjects or complex backgrounds.
+        
         To begin, upload images and click the 'Run Classifier' button.
         You can stay in this page for for automatic bounding box detection at the cost of lower
         accuracy or head over to the 'Wildlife Classifier' tab for higher accuracy classification
@@ -283,7 +294,10 @@ if tab_selector == "Bounding Box Detection":
         """
     )
     st.write(
-        "To learn more about the model, visit the project's [GitHub repo](GITHUB_URL)."
+        """
+        You can find additional information on the datasets used for training in the 'Datasets' tab.
+        To learn more about the model, visit the project's [GitHub repo](GITHUB_URL).
+        """
     )
     st.write("")
 
