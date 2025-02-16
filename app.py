@@ -11,6 +11,8 @@ from torch import nn
 from ultralytics import YOLO
 
 GITHUB_URL = "https://github.com/SnowdasNeves/cifar10-image-classifier"
+CCT_URL = "https://lila.science/datasets/caltech-camera-traps"
+CIFAR_URL = "https://www.cs.toronto.edu/~kriz/cifar.html"
 
 # Class dictionary for CIFAR-10
 classes_cifar = {
@@ -386,3 +388,11 @@ if tab_selector == "Bounding Box Detection":
 
     else:
         st.info("Please upload images to begin.")
+
+
+if tab_selector == "Datasets":
+    st.title("The CIFAR-10 and CCT20 Datasets")
+    st.write(
+        "To learn more about the datasets, visit [CIFAR-10](CIFAR_URL) and [CCT20](CCT_URL)."
+    )
+    st.write("")
