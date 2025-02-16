@@ -2,7 +2,7 @@
 
 This project uses deep learning models to classify wildlife images and detect bounding boxes around animals in camera trap images. The models were fine-tuned using the CIFAR-10 and CCT20 datasets and deployed via a Streamlit-based application.
 
-To classify your own images without having to download the files in this repo you can access the [project's Hugging Face space]().
+To classify your own images without having to download the files in this repo you can access the [project's Hugging Face space](https://huggingface.co/spaces/diogoneves/wildlife-classifier).
 
 ## Project Structure
 
