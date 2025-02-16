@@ -1,4 +1,5 @@
 import os
+import math
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -17,7 +18,7 @@ CIFAR_URL = "https://www.cs.toronto.edu/~kriz/cifar.html"
 # Class dictionary for CIFAR-10
 classes_cifar = {
     0: "airplane",
-    1: "automobile",
+    1: "car",
     2: "bird",
     3: "cat",
     4: "deer",
@@ -30,26 +31,23 @@ classes_cifar = {
 
 # Class dictionary for CCT20
 classes_cct = {
-    0: "badger",
-    1: "bird",
-    2: "bobcat",
-    3: "car",
-    4: "cat",
-    5: "coyote",
-    6: "deer",
-    7: "dog",
-    8: "empty",
-    9: "fox",
-    10: "opossum",
-    11: "rabbit",
-    12: "raccoon",
-    13: "rodent",
-    14: "skunk",
-    15: "squirrel",
+    0: "bobcat",
+    1: "opossum",
+    2: "empty",
+    3: "coyote",
+    4: "raccoon",
+    5: "bird",
+    6: "dog",
+    7: "cat",
+    8: "squirrel",
+    9: "rabbit",
+    10: "skunk",
+    11: "rodent",
+    12: "car",  # car went from 14 to 12. Eliminated 12, 13 and 15
 }
 
 
-def classifier(image, threshold):
+def classifier(image, threshold, class_dict, model_select):
     """Receives uploaded images and returns predictions."""
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -63,12 +61,14 @@ def classifier(image, threshold):
         nn.Linear(num_ftrs, 512),
         nn.ReLU(inplace=True),
         nn.Dropout(0.5),
-        nn.Linear(512, len(classes_cifar)),
+        nn.Linear(512, len(class_dict)),
     )
 
     model.load_state_dict(
         torch.load(
-            os.path.join("trained-models", "cifar10_resnet4.pth"), weights_only=True
+            os.path.join("trained-models", model_select),
+            weights_only=True,
+            map_location=device,
         )
     )
 
@@ -93,13 +93,21 @@ def classifier(image, threshold):
     if max_probs.item() < threshold:
         return "none"
     else:
-        return classes_cifar[predicted.item()]
+        if class_dict == classes_cifar and predicted.item() in {
+            0,
+            8,
+            9,
+        }:  # Removing vehicle predictions from CIFAR-10 trained model
+            return "none"
+        else:
+            return class_dict[predicted.item()]
 
 
 def detect_bounding_box(image_file, threshold):
-    bbox_model = YOLO(os.path.join("trained-models", "best.pt"))
+    bbox_model = YOLO(os.path.join("trained-models", "yolo_bbox_detection.pt"))
 
     results = bbox_model.predict(image_file, threshold)
+    results = list(results)
     results = results[0].boxes.xywh.tolist()[0]
     results[2], results[3] = results[0] + results[2], results[1] + results[3]
     return results
@@ -110,6 +118,9 @@ st.set_page_config(page_title="Wildlife AI Classifier", page_icon=":elephant:")
 
 if st.session_state.get("predictions") is None:
     st.session_state["predictions"] = {}
+
+if st.session_state.get("images_cropped") is None:
+    st.session_state["images_cropped"] = []
 
 tab_selector = st.pills(
     "Tabs",
@@ -174,9 +185,15 @@ if tab_selector == "Wildlife Classifier":
             show_images = st.toggle("Show uploaded images", False)
 
             if show_images:
-                cols = st.columns(len(uploaded_files))
-                for col, file, image in zip(cols, uploaded_files, images):
-                    col.image(image, caption=file.name, width=150)
+                rows = math.ceil(len(uploaded_files) / 4)
+                for row in range(rows):
+                    cols = st.columns(4)
+                    for col, file, image in zip(
+                        cols,
+                        uploaded_files[row * 4 : (row + 1) * 4],
+                        images[row * 4 : (row + 1) * 4],
+                    ):
+                        col.image(image, caption=file.name, width=150)
 
         col1, col2 = st.columns(2)
         with col1:
@@ -189,7 +206,12 @@ if tab_selector == "Wildlife Classifier":
 
             if run_button:
                 for file, image in zip(uploaded_files, images):
-                    prediction = classifier(image, conf_threshold)
+                    prediction = classifier(
+                        image,
+                        conf_threshold,
+                        class_dict=classes_cifar,
+                        model_select="cifar10_resnet18.pth",
+                    )
                     predictions[file.name] = prediction
 
                 st.session_state["predictions"] = predictions
@@ -313,9 +335,15 @@ if tab_selector == "Bounding Box Detection":
             show_images = st.toggle("Show uploaded images", False)
 
             if show_images:
-                cols = st.columns(4)
-                for col, file, image in zip(cols, uploaded_files, images):
-                    col.image(image, caption=file.name, width=150)
+                rows = math.ceil(len(uploaded_files) / 4)
+                for row in range(rows):
+                    cols = st.columns(4)
+                    for col, file, image in zip(
+                        cols,
+                        uploaded_files[row * 4 : (row + 1) * 4],
+                        images[row * 4 : (row + 1) * 4],
+                    ):
+                        col.image(image, caption=file.name, width=150)
 
         col1, col2 = st.columns(2)
         with col1:
@@ -330,8 +358,14 @@ if tab_selector == "Bounding Box Detection":
                 for file, image in zip(uploaded_files, images):
                     bbox = detect_bounding_box(image, bbox_conf_threshold)
                     image_cropped = image.crop(bbox)
-                    st.image(image_cropped, caption=file.name, width=150)
-                    prediction = classifier(image_cropped, conf_threshold)
+                    st.session_state.images_cropped.append(image_cropped)
+
+                    prediction = classifier(
+                        image_cropped,
+                        conf_threshold,
+                        class_dict=classes_cct,
+                        model_select="cct20_resnet18.pth",
+                    )
                     predictions[file.name] = prediction
 
                 st.session_state["predictions"] = predictions
@@ -339,6 +373,7 @@ if tab_selector == "Bounding Box Detection":
         with col2:
             if st.button("Clear Results", use_container_width=True):
                 st.session_state["predictions"] = {}
+                st.session_state["images_cropped"] = []
 
         predictions_df = pd.DataFrame(
             list(st.session_state.predictions.items()),
@@ -361,6 +396,17 @@ if tab_selector == "Bounding Box Detection":
             )
 
             st.write("Number of images uploaded:", len(uploaded_files))
+            if st.toggle("Show detected bounding box", False):
+                rows = math.ceil(len(uploaded_files) / 4)
+                for row in range(rows):
+                    cols = st.columns(4)
+                    for col, file, image in zip(
+                        cols,
+                        uploaded_files[row * 4 : (row + 1) * 4],
+                        st.session_state.images_cropped[row * 4 : (row + 1) * 4],
+                    ):
+                        col.image(image, caption=file.name, width=150)
+
             st.write("")
 
             st.dataframe(
