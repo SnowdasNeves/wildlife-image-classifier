@@ -11,7 +11,7 @@ from torchvision import transforms, models
 from torch import nn
 from ultralytics import YOLO
 
-GITHUB_URL = "https://github.com/SnowdasNeves/cifar10-image-classifier"
+GITHUB_URL = "https://github.com/SnowdasNeves/cifar10-image-classifier.git"
 CCT_URL = "https://lila.science/datasets/caltech-camera-traps"
 CIFAR_URL = "https://www.cs.toronto.edu/~kriz/cifar.html"
 
@@ -104,7 +104,7 @@ def classifier(image, threshold, class_dict, model_select):
 
 
 def detect_bounding_box(image_file, threshold):
-    bbox_model = YOLO(os.path.join("trained-models", "yolo_bbox_detection.pt"))
+    bbox_model = YOLO(os.path.join("trained-models", "yolo_bbox_detection_update.pt"))
 
     results = bbox_model.predict(image_file, threshold)
     results = list(results)
