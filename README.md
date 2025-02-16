@@ -6,12 +6,8 @@ To classify your own images without having to download the files in this repo yo
 
 ## Project Structure
 
-<<<<<<< Updated upstream
-- **`yolo_bbox_detection.ipynb`**: Training and testing of the YOLO model for bounding box detection.
-=======
 - **`yolo_bbox_detection.ipynb`**: Training of the YOLO model for bounding box detection.
 - **`yolo_bbox_detection_test.ipynb`**: Testing of the YOLO model for bounding box detection.
->>>>>>> Stashed changes
 - **`cct20_resnet.ipynb`**: Training and testing of the ResNet18 model using the CCT20 dataset.
 - **`cifar10_resnet.ipynb`**: Training and testing of the ResNet18 model using the CIFAR-10 dataset.
 - **`cifar10_eda.ipynb` & `cct20_eda.ipynb`**: Exploratory Data Analysis for CIFAR-10 and CCT20.
