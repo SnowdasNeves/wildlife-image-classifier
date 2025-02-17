@@ -327,28 +327,28 @@ if tab_selector == "Bounding Box Detection":
 
         with st.expander("**Additional Settings**", expanded=True):
             st.write(
-                """
-                Adjust the confidence threshold to balance precision and recall.
-                A higher threshold will detect morebounding boxes (default value is 0.3).
-                """
+                "Adjust the confidence threshold to filter out low-confidence predictions (default value is 0.8)."
             )
             conf_threshold = st.slider(
                 "Confidence Threshold.",
                 0.0,
                 1.0,
-                0.3,
+                0.8,
                 0.01,
                 label_visibility="collapsed",
             )
 
             st.write(
-                "Adjust the bbox detection confidence threshold (default value 0.5)."
+                """
+                Adjust the confidence threshold to balance precision and recall.
+                A higher threshold will detect morebounding boxes (default value is 0.3).
+                """
             )
             bbox_conf_threshold = st.slider(
                 "Confidence Threshold for BBox.",
                 0.0,
                 1.0,
-                0.5,
+                0.3,
                 0.01,
                 label_visibility="collapsed",
             )
