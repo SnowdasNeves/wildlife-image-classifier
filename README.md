@@ -55,10 +55,4 @@ streamlit run app.py
 - Make sure the `trained-models` folder contains the necessary model weights.
 - Adjust the confidence thresholds as needed to balance precision and recall.
 
-## Acknowledgments
-
-- [PyTorch](https://pytorch.org/)
-- [Streamlit](https://streamlit.io/)
-- [Ultralytics YOLO](https://github.com/ultralytics/yolov5)
-
 Feel free to contribute to the project by submitting issues or pull requests!
