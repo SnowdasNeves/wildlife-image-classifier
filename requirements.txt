@@ -1,10 +1,11 @@
 pandas
 numpy
-scikit-learn
 matplotlib
-streamlit
+seaborn
+scikit-learn
 torch
 torchvision
 torchaudio
-opencv-python
 ultralytics
+opencv-python
+streamlit

@@ -6,14 +6,13 @@ To classify your own images without having to download the files in this repo yo
 
 ## Project Structure
 
-- **`yolo_bbox_detection.ipynb`**: Training of the YOLO model for bounding box detection.
-- **`yolo_bbox_detection_test.ipynb`**: Testing of the YOLO model for bounding box detection.
-- **`cct20_resnet.ipynb`**: Training and testing of the ResNet18 model using the CCT20 dataset.
-- **`cifar10_resnet.ipynb`**: Training and testing of the ResNet18 model using the CIFAR-10 dataset.
-- **`cifar10_eda.ipynb` & `cct20_eda.ipynb`**: Exploratory Data Analysis for CIFAR-10 and CCT20.
-- **`app.py`**: Streamlit application for real-time classification and detection.
-- **`requirements.txt`**: Dependencies for running the application.
-- **`trained-models/`**: Directory containing the trained model weights.
+- **`dataset_analysis/`**: Exploratory Data Analysis for CIFAR-10 and CCT20.
+- **`models/classification/cct20_resnet.ipynb`**: Training and testing of the ResNet18 model using the CCT20 dataset.
+- **`models/classification/cifar10_resnet.ipynb`**: Training and testing of the ResNet18 model using the CIFAR-10 dataset.
+- **`models/detection/yolo_bbox_detection.ipynb`**: Training of the YOLO model for bounding box detection.
+- **`models/detection/yolo_bbox_detection_test.ipynb`**: Testing of the YOLO model for bounding box detection.
+- **`saved-models/`**: Directory containing the trained model weights.
+- **`streamlit_app/app.py`**: Streamlit application for real-time classification and detection.
 
 ## Models Used
 
